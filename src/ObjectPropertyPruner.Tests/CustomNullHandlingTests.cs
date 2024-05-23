@@ -1,16 +1,31 @@
 ﻿using FluentAssertions;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using System.Threading.Tasks;
 
 namespace ObjectPropertyPruner.Tests
 {
     // TODO : This is a failed attempt at using annotations to selectively prune null fields
     public class CustomNullHandlingTests
+    {
+        // todo : this test is expected to fail
+        [Fact]
+        public void When_UsingCustomNullHandler_ExpectItRemovesNullValuesWhenAnnotated()
+        {
+            // Arrange
+            var input = new CustomAnnotatedTestObject
+            {
+                // todo : The attribute will only work if the property is set
+                Bar = "Foo"
+            };
+            // Act
+            var actual = JsonSerializer.Serialize(input);
+            // Assert
+            var expected = "{\"Foo\":\"bar\",\"FooBar\":0}";
+            actual.Should().Be(expected);
+        }
+    }
+
+    public class NullHandlingAttributeTests
     {
         [Fact]
         public void When_UsingCustomNullHandler_ExpectItRemovesNullValuesWhenAnnotated()
@@ -19,7 +34,7 @@ namespace ObjectPropertyPruner.Tests
             var input = new AnnotatedTestObject
             {
                 // todo : Figure out why the null value is still serialized. This technique works in newtonsoft?!
-                Bar = "Foo"
+                Bar = "foo"
             };
             var options = new JsonSerializerOptions
             {
@@ -28,15 +43,15 @@ namespace ObjectPropertyPruner.Tests
             // Act
             var actual = JsonSerializer.Serialize(input, options);
             // Assert
-            var expected = "{\"Foo\":\"bar\",\"FooBar\":0}";
+            var expected = "{\"Bar\":\"foo\",\"FooBar\":0}";
             actual.Should().Be(expected);
         }
     }
 
     // I tried object, but got exceptions about not being compatible with System.String or System.Int
-    public class CustomStringNullHandlingConverter : JsonConverter<string>
+    public class CustomStringNullHandlingConverter : JsonConverter<string?>
     {
-        public override void Write(Utf8JsonWriter writer, string value, JsonSerializerOptions options)
+        public override void Write(Utf8JsonWriter writer, string? value, JsonSerializerOptions options)
         {
             if (value == null)
             {
@@ -55,9 +70,19 @@ namespace ObjectPropertyPruner.Tests
         }
     }
 
-    public class AnnotatedTestObject
+    public class CustomAnnotatedTestObject
     {
         [JsonConverter(typeof(CustomStringNullHandlingConverter))]
+        public string Foo { get; set; }
+
+        public string Bar { get; set; }
+
+        public int FooBar { get; set; }
+    }
+
+    public class AnnotatedTestObject
+    {
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
         public string Foo { get; set; }
 
         public string Bar { get; set; }
