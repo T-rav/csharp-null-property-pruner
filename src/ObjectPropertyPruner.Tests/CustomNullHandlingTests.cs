@@ -12,15 +12,20 @@ namespace ObjectPropertyPruner.Tests
     public class CustomNullHandlingTests
     {
         [Fact]
-        public void When_JsonIgnoreCondition_WhenWritingNull_RemovesNullValues()
+        public void When_UsingCustomNullHandler_ExpectItRemovesNullValuesWhenAnnotated()
         {
             // Arrange
             var input = new AnnotatedTestObject
             {
+                // todo : Figure out why the null value is still serialized. This technique works in newtonsoft?!
                 Bar = "Foo"
             };
+            var options = new JsonSerializerOptions
+            {
+                Converters = { new CustomStringNullHandlingConverter() }
+            };
             // Act
-            var actual = JsonSerializer.Serialize(input);
+            var actual = JsonSerializer.Serialize(input, options);
             // Assert
             var expected = "{\"Foo\":\"bar\",\"FooBar\":0}";
             actual.Should().Be(expected);
@@ -39,7 +44,7 @@ namespace ObjectPropertyPruner.Tests
             }
 
             // Default serialization behavior
-            JsonSerializer.Serialize(writer, value.GetType(), options);
+            writer.WriteStringValue(value);
         }
 
         public override string Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
