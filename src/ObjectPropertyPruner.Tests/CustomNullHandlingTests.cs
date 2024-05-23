@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 
 namespace ObjectPropertyPruner.Tests
 {
+    // TODO : This is a failed attempt at using annotations to selectively prune null fields
     public class CustomNullHandlingTests
     {
         [Fact]

@@ -4,6 +4,7 @@ using System.Text.Json;
 
 namespace ObjectPropertyPruner.Tests
 {
+    // TODO : Use ExpandoObject (dynamics) to prune selective null properties at runtime. NOT ADIVSED TO BE USED! 
     public class DynamicObjectPruning
     {
         [Fact]
@@ -29,7 +30,8 @@ namespace ObjectPropertyPruner.Tests
             var expando = new ExpandoObject();
             var expandoDict = (IDictionary<string, object>)expando;
 
-            var properties = obj.GetType().GetProperties(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance);
+            var properties = obj.GetType().GetProperties(System.Reflection.BindingFlags.Public 
+                                                         | System.Reflection.BindingFlags.Instance);
 
             foreach(var property in properties)
             {

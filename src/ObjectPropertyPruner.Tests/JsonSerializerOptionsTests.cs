@@ -3,6 +3,7 @@ using System.Text.Json;
 
 namespace ObjectPropertyPruner.Tests
 {
+    // TODO : This method just removes all null properties
     public class JsonSerializerOptionsTests
     {
         [Fact]
